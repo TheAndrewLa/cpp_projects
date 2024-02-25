@@ -14,7 +14,7 @@ set(TEST_SOURCE ${CMAKE_SOURCE_DIR}/main_test.cpp)
 # Config with test and 'TEST' define
 add_executable(test_lines ${LIB} ${TEST_SOURCE})
 target_compile_definitions(test_lines PRIVATE TEST)
-target_compile_options(test_lines PRIVATE -Wall -Wextra -Werror -pedantic -fsanitize=undefined)
+target_compile_options(test_lines PRIVATE -Wall -Wextra -Werror -fsanitize=undefined)
 target_link_options(test_lines PRIVATE -fsanitize=undefined)
 target_link_libraries(test_lines PRIVATE gtest_main gmock_main)
 

@@ -39,7 +39,7 @@ class Line {
     Line(const Line& line) = default;
 
     // Some ctors
-    Line(const Point& p1, const Point& p2);      // line by two points in 2D space
+    Line(const Point& p1, const Point& p2);               // line by two points in 2D space
     Line(double tangent, double bias = 0) noexcept;       // line by equation: y = kx + b (or y = kx)
 
     // Dtor should be default

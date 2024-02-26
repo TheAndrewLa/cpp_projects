@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cmath>
 #include <cassert>
+#include <stdexcept>
 
 struct Point {
     double x;
@@ -21,18 +21,15 @@ struct Point {
 };
 
 class Line {
-    // Initial point
-    double x0_;
-    double y0_;
+    using Vector = Point;
 
-    // Direction vector
-    double x_dif_;
-    double y_dif_;
+    Point p0_;
+    Vector dif_;
 
     // Function checks if points is on line
     // Just geometry...
     inline bool check_point_(const Point& point) const {
-        return (this->x_dif_ * (point.y - this->y0_)) == (this->y_dif_ * (point.x - this->x0_));
+        return (this->dif_.x * (point.y - this->p0_.y)) == (this->dif_.y * (point.x - this->p0_.x));
     }
 
     public:
@@ -43,7 +40,7 @@ class Line {
 
     // Some ctors
     Line(const Point& p1, const Point& p2);      // line by two points in 2D space
-    Line(double tangent, double bias = 0);       // line by equation: y = kx + b (or y = kx)
+    Line(double tangent, double bias = 0) noexcept;       // line by equation: y = kx + b (or y = kx)
 
     // Dtor should be default
     ~Line() = default;
@@ -53,6 +50,6 @@ class Line {
     Point find_intersection(const Line& line) const;
 
     inline Point get_point(double param = 0) const {
-        return {this->x0_ + param * this->x_dif_, this->y0_ + param * this->y_dif_};
+        return {this->p0_.x + param * this->dif_.x, this->p0_.y + param * this->dif_.y};
     }
 };

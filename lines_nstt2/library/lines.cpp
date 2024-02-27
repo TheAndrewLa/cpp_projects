@@ -41,15 +41,17 @@ Point Line::find_intersection(const Line& other) const {
         return p2;
 
     // Calculation of intersection
-    // Divison by zero will not be done, cuz of checkin be4
-
     double denom = ((p1.x - p2.x) * (p3.y - p4.y)) - ((p1.y - p2.y) * (p3.x - p4.x));
 
     // KABOOM!
-    assert(denom != 0 && "Denominator can not be zero!");
+    // We can't divide by zero
+    assert(denom != 0);
 
     double x = ((p1.x * p2.y - p1.y * p2.x) * (p3.x - p4.x) - (p3.x * p4.y - p3.y * p4.x) * (p1.x - p2.x)) / (denom);
     double y = ((p1.x * p2.y - p1.y * p2.x) * (p3.y - p4.y) - (p3.x * p4.y - p3.y * p4.x) * (p1.y - p2.y)) / (denom);
+
+    // Checking correctness of logic of program
+    assert(this->check_point_({x, y}) && other.check_point_({x, y}));
 
     return {x, y};
 }

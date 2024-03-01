@@ -51,7 +51,8 @@ Point Line::find_intersection(const Line& other) const {
     double y = ((p1.x * p2.y - p1.y * p2.x) * (p3.y - p4.y) - (p3.x * p4.y - p3.y * p4.x) * (p1.y - p2.y)) / (denom);
 
     // Checking correctness of logic of program
-    assert(this->check_point_({x, y}) && other.check_point_({x, y}));
+    assert(this->check_point_({x, y}));
+    assert(other.check_point_({x, y}));
 
     return {x, y};
 }

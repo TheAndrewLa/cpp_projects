@@ -12,13 +12,15 @@ TEST(Treap, Copy) {
 
     Treap treap2(treap);
 
-    EXPECT_EQ(treap.search(3), treap2.search(3));
-    EXPECT_EQ(treap.min(), treap2.min());
+    // Remove node from initial treap and then try to find it in copied treap
+    treap.erase(3);
+    EXPECT_EQ(treap2.search(3), (Treap::NodeValue {3, 4}));
 
     Treap treap3 = treap;
 
-    EXPECT_EQ(treap.max(), treap3.max());
-    EXPECT_EQ(treap.search(6), treap3.search(6));
+    // Remove node from initial treap and then try to find it in copied treap
+    treap.erase(6);
+    EXPECT_EQ(treap3.search(6), (Treap::NodeValue {6, 3}));
 }
 
 TEST(Treap, Insert) {

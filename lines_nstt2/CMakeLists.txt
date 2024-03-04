@@ -1,4 +1,4 @@
-set(CMAKE_MINIMUM_REQUIRED_VERSION 3.2)
+cmake_minimum_required(VERSION 3.28)
 project(Lines)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -11,6 +11,7 @@ set(TEST_SOURCE ${CMAKE_SOURCE_DIR}/main_test.cpp)
 
 include(FetchContent)
 FetchContent_Declare(googletest URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip)
+FetchContent_MakeAvailable(googletest)
 
 # Config with test and other shit
 add_executable(test_lines ${LIB} ${TEST_SOURCE})

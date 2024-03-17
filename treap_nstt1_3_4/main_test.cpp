@@ -4,11 +4,11 @@
 TEST(Treap, Copy) {
     Treap treap;
 
-    treap.insert(5, 1);
-    treap.insert(7, 2);
-    treap.insert(6, 3);
-    treap.insert(3, 4);
-    treap.insert(9, 9);
+    treap.insert({5, 1});
+    treap.insert({7, 2});
+    treap.insert({6, 3});
+    treap.insert({3, 4});
+    treap.insert({9, 9});
 
     Treap treap2(treap);
 
@@ -23,14 +23,36 @@ TEST(Treap, Copy) {
     EXPECT_EQ(treap3.search(6), (Treap::NodeValue {6, 3}));
 }
 
+TEST(Treap, Move) {
+    Treap treap;
+
+    treap.insert({5, 1});
+    treap.insert({7, 2});
+    treap.insert({6, 3});
+    treap.insert({3, 4});
+    treap.insert({9, 9});
+
+    Treap treap2({treap});
+
+    // Remove node from initial treap and then try to find it in copied treap
+    treap.erase(3);
+    EXPECT_EQ(treap2.search(3), (Treap::NodeValue {3, 4}));
+
+    Treap treap3 = std::move(treap);
+
+    // Remove node from initial treap and then try to find it in copied treap
+    treap.erase(6);
+    EXPECT_EQ(treap3.search(6), (Treap::NodeValue {6, 3}));
+}
+
 TEST(Treap, Insert) {
     Treap treap;
     
-    treap.insert(5, 1);
-    treap.insert(7, 2);
-    treap.insert(6, 3);
-    treap.insert(3, 4);
-    treap.insert(9, 9);
+    treap.insert({5, 1});
+    treap.insert({7, 2});
+    treap.insert({6, 3});
+    treap.insert({3, 4});
+    treap.insert({9, 9});
 
     EXPECT_EQ(treap.max(), (Treap::NodeValue {9, 9}));
     EXPECT_EQ(treap.min(), (Treap::NodeValue {3, 4}));
@@ -39,11 +61,11 @@ TEST(Treap, Insert) {
 TEST(Treap, Erase) {
     Treap treap;
     
-    treap.insert(5, 1);
-    treap.insert(7, 2);
-    treap.insert(6, 3);
-    treap.insert(3, 4);
-    treap.insert(9, 9);
+    treap.insert({5, 1});
+    treap.insert({7, 2});
+    treap.insert({6, 3});
+    treap.insert({3, 4});
+    treap.insert({9, 9});
 
     treap.erase(9);
     treap.erase(3);
@@ -60,11 +82,11 @@ TEST(Treap, Erase) {
 TEST(Treap, Search) {
     Treap treap;
     
-    treap.insert(5, 1);
-    treap.insert(7, 2);
-    treap.insert(6, 3);
-    treap.insert(3, 4);
-    treap.insert(9, 9);
+    treap.insert({5, 1});
+    treap.insert({7, 2});
+    treap.insert({6, 3});
+    treap.insert({3, 4});
+    treap.insert({9, 9});
 
     EXPECT_EQ(treap.search(7), (Treap::NodeValue {7, 2}));
     EXPECT_EQ(treap.search(6), (Treap::NodeValue {6, 3}));

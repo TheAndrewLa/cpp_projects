@@ -1,11 +1,8 @@
 #pragma once
 #include <vector>
 
-using std::vector;
-using std::pair;
-
 class Treap {
-    public:
+public:
     struct Node {
         int key, priority;
         Node* left;
@@ -15,21 +12,25 @@ class Treap {
         Node(int key, int priority);
     };
 
-    using NodeValue = pair<int, int>;
+    using NodeValue = std::pair<int, int>;
 
-    private:
-    Node* root_;
-    Node* find_node_(int key) const;
-
-    public:
     Treap();
     Treap(NodeValue root);
+
     Treap(const Treap& treap);
+    Treap(Treap&& treap);
+
     ~Treap();
 
     Treap& operator=(const Treap& other);
+    Treap& operator=(Treap&& other);
 
-    void insert(int key, int priority);
+    // Insert by key & priority
+    void insert(const NodeValue& value); // Do i really need const ref here!?
+
+    // Insert only by priority (key will be generated randomly)
+    void insert(int key);
+
     void erase(int key);
     NodeValue search(int key) const;
 
@@ -38,7 +39,7 @@ class Treap {
 
     void clear();
 
-    inline Node* root() const {
-        return this->root_;
-    }
+private:
+    Node* root_;
+    Node* find_node_(int key) const;
 };

@@ -69,13 +69,24 @@ Treap::Treap() : root_(nullptr) {}
 Treap::Treap(NodeValue value) : root_(new Node(value.first, value.second)) {}
 Treap::Treap(const Treap& treap) : root_(copy_node(treap.root_)) {}
 
+Treap::Treap(Treap&& treap) : root_(treap.root_) {
+    treap.root_ = nullptr;
+}
+
 Treap::~Treap() {
-    delete_node(this->root_);
+    this->clear();
 }
 
 Treap& Treap::operator=(const Treap& other) {
     delete_node(this->root_);
     this->root_ = copy_node(other.root_);
+    return *this;
+}
+
+Treap& Treap::operator=(Treap&& other) {
+    delete_node(this->root_);
+    this->root_ = other.root_;
+    other.root_ = nullptr;
     return *this;
 }
 
@@ -92,7 +103,10 @@ Treap::Node* Treap::find_node_(int key) const {
     return node;
 }
 
-void Treap::insert(int key, int priority) {
+void Treap::insert(const NodeValue& value) {
+    int key = value.first;
+    int priority = value.second;
+
     if (this->root_ == nullptr) {
         this->root_ = new Node(key, priority);
         return;

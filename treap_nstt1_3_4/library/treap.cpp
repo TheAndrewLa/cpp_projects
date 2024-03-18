@@ -128,12 +128,12 @@ int Treap::insert(int priority) {
     int highest = this->max().first;
     int lowest = this->min().first;
 
-    int key1 = highest + (std::rand() % 10);
-    int key2 = lowest - (std::rand() % 10);
-
+    int key1 = highest + (std::rand() % 10) + 1;
+    int key2 = lowest - (std::rand() % 10) - 1;
     int factor = std::rand() % 2;
 
-    int key = key1 * factor;
+    int key;
+    key = key1 * factor;
     key += key2 * (1 - factor);
 
     this->insert({key, priority});
@@ -153,7 +153,7 @@ void Treap::erase(int key) {
     Node* left2;
     Node* right2;
 
-    split_treap(this->root_, key - 1, &left1, &right1);
+    split_treap(this->root_, key, &left1, &right1);
     split_treap(this->root_, key + 1, &left2, &right2);
 
     this->root_ = merge_nodes(left1, right2);

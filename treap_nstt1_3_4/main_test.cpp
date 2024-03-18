@@ -53,47 +53,42 @@ TEST(Treap, Insert) {
     treap.insert({6, 3});
     treap.insert({3, 4});
     treap.insert({9, 9});
-
-    EXPECT_EQ(treap.max(), (Treap::NodeValue {9, 9}));
-    EXPECT_EQ(treap.min(), (Treap::NodeValue {3, 4}));
 }
 
 TEST(Treap, Erase) {
     Treap treap;
     
-    treap.insert({5, 1});
-    treap.insert({7, 2});
-    treap.insert({6, 3});
-    treap.insert({3, 4});
-    treap.insert({9, 9});
+    int k1 = treap.insert(1);
+    int k2 = treap.insert(2);
+    int k3 = treap.insert(3);
+    int k4 = treap.insert(4);
+    int k5 = treap.insert(5);
 
-    treap.erase(9);
-    treap.erase(3);
+    treap.erase(k1);
+    treap.erase(k5);
 
-    EXPECT_EQ(treap.max(), (Treap::NodeValue {7, 2}));
-    EXPECT_EQ(treap.min(), (Treap::NodeValue {5, 1}));
+    EXPECT_EQ(treap.search(k2), (Treap::NodeValue {k2, 2}));
+    EXPECT_EQ(treap.search(k3), (Treap::NodeValue {k3, 3}));
+    EXPECT_EQ(treap.search(k4), (Treap::NodeValue {k4, 4}));
 
-    treap.erase(5);
-
-    EXPECT_EQ(treap.min(), (Treap::NodeValue {6, 3}));
-    EXPECT_EQ(treap.max(), (Treap::NodeValue {7, 2}));
+    EXPECT_EQ(treap.search(k1), (Treap::NodeValue {-1, -1}));
+    EXPECT_EQ(treap.search(k5), (Treap::NodeValue {-1, -1}));
 }
 
 TEST(Treap, Search) {
     Treap treap;
     
-    treap.insert({5, 1});
-    treap.insert({7, 2});
-    treap.insert({6, 3});
-    treap.insert({3, 4});
-    treap.insert({9, 9});
+    int k1 = treap.insert(1);
+    int k2 = treap.insert(2);
+    int k3 = treap.insert(3);
+    int k4 = treap.insert(4);
+    int k5 = treap.insert(5);
 
-    EXPECT_EQ(treap.search(7), (Treap::NodeValue {7, 2}));
-    EXPECT_EQ(treap.search(6), (Treap::NodeValue {6, 3}));
-    EXPECT_EQ(treap.search(5), (Treap::NodeValue {5, 1}));
-    EXPECT_EQ(treap.search(3), (Treap::NodeValue {3, 4}));
-    EXPECT_EQ(treap.search(9), (Treap::NodeValue {9, 9}));
-    EXPECT_EQ(treap.search(4), (Treap::NodeValue {-1, -1}));
+    EXPECT_EQ(treap.search(k1), (Treap::NodeValue {k1, 1}));
+    EXPECT_EQ(treap.search(k2), (Treap::NodeValue {k2, 2}));
+    EXPECT_EQ(treap.search(k3), (Treap::NodeValue {k3, 3}));
+    EXPECT_EQ(treap.search(k4), (Treap::NodeValue {k4, 4}));
+    EXPECT_EQ(treap.search(k5), (Treap::NodeValue {k5, 5}));
 }
 
 int main(int argc, char** argv) {

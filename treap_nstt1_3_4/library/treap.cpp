@@ -125,6 +125,8 @@ void Treap::insert(const NodeValue& value) {
 }
 
 int Treap::insert(int priority) {
+    std::srand(56);
+
     int highest = this->max().first;
     int lowest = this->min().first;
 

@@ -124,10 +124,26 @@ void Treap::insert(const NodeValue& value) {
     this->root_ = merge_nodes(merge_nodes(t1, node), t2);
 }
 
+int Treap::insert(int priority) {
+    int highest = this->max().first;
+    int lowest = this->min().first;
+
+    int key1 = highest + (std::rand() % 10);
+    int key2 = lowest - (std::rand() % 10);
+
+    int factor = std::rand() % 2;
+
+    int key = key1 * factor;
+    key += key2 * (1 - factor);
+
+    this->insert({key, priority});
+
+    return key;
+}
+
 void Treap::erase(int key) {
     Node* target = this->find_node_(key);
-    
-    // Nothing to erase
+
     if (target == nullptr)
         return;
 

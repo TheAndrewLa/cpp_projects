@@ -1,5 +1,5 @@
 #pragma once
-#include <vector>
+#include <random>
 
 class Treap {
 public:
@@ -26,10 +26,10 @@ public:
     Treap& operator=(Treap&& other);
 
     // Insert by key & priority
-    void insert(const NodeValue& value); // Do i really need const ref here!?
+    void insert(const NodeValue& value);
 
-    // Insert only by priority (key will be generated randomly)
-    void insert(int key);
+    // Insert only by priority (key will be generated randomly and returned)
+    int insert(int priority);
 
     void erase(int key);
     NodeValue search(int key) const;

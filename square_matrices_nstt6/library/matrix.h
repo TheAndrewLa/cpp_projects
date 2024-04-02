@@ -9,8 +9,8 @@ using isize = std::ptrdiff_t;
 
 class SqMatrix {
     SqMatrix() = delete;
-    SqMatrix(usize size, std::vector<float> diagonal);
     SqMatrix(usize size) noexcept;
+    SqMatrix(std::vector<float> diagonal) noexcept;
 
     SqMatrix(const SqMatrix& matrix);
     SqMatrix(SqMatrix&& matrix);
@@ -20,10 +20,10 @@ class SqMatrix {
     SqMatrix& operator=(const SqMatrix& ref);
     SqMatrix& operator=(SqMatrix&& ref);
 
-    explicit operator double();
+    explicit operator float();
 
-    bool operator==(const SqMatrix& other);
-    bool operator!=(const SqMatrix& other);
+    bool operator==(const SqMatrix& other) const;
+    bool operator!=(const SqMatrix& other) const;
 
     // No checking in this function. LET THE UB OUT!!!
     float* operator[](usize index);
@@ -31,6 +31,7 @@ class SqMatrix {
     SqMatrix& operator+(const SqMatrix& other);
     SqMatrix& operator+=(const SqMatrix& other);
 
+    // STRASSEN!!! (but not today)
     SqMatrix operator*(const SqMatrix& other);
     SqMatrix& operator*=(const SqMatrix& other);
 

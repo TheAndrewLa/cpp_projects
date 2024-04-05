@@ -1,14 +1,21 @@
 #pragma once
 
 #include <cstddef>
+#include <cassert>
+
 #include <vector>
+
+#include <string>
+#include <sstream>
+
 #include <stdexcept>
 
 using usize = std::size_t;
 using isize = std::ptrdiff_t;
 
 class SqMatrix {
-    SqMatrix() = delete;
+    public:
+    SqMatrix() noexcept;
     SqMatrix(usize size) noexcept;
     SqMatrix(std::vector<float> diagonal) noexcept;
 
@@ -25,22 +32,40 @@ class SqMatrix {
     bool operator==(const SqMatrix& other) const;
     bool operator!=(const SqMatrix& other) const;
 
-    // No checking in this function. LET THE UB OUT!!!
-    float* operator[](usize index);
+    // No index checking in this function
+    // LET THE UB OUT!!!
+
+    inline float* operator[](usize index) {
+        assert(mat_ != nullptr);
+        assert(size_ > 0);
+
+        return reinterpret_cast<float*>(mat_ + (index * size_));
+    }
+
+    inline const float* operator[](usize index) const {
+        assert(mat_ != nullptr);
+        assert(size_ > 0);
+
+        return reinterpret_cast<const float*>(mat_ + (index * size_));
+    }
 
     SqMatrix& operator+(const SqMatrix& other);
     SqMatrix& operator+=(const SqMatrix& other);
 
-    // STRASSEN!!! (but not today)
+    // AND NOW.....
+    // STRASSEN APPEARS (no)
+
     SqMatrix operator*(const SqMatrix& other);
     SqMatrix& operator*=(const SqMatrix& other);
 
-    SqMatrix operator*(float scalar) noexcept;
+    SqMatrix operator*(float scalar) const noexcept;
     SqMatrix& operator*=(float scalar) noexcept;
 
-    inline usize Size() const noexcept {
+    inline usize size() const noexcept {
         return size_;
     }
+
+    std::string to_string() const noexcept;
 
     private:
     usize size_;

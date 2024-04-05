@@ -1,5 +1,6 @@
 #include "library/scoped_ptr.hpp"
 #include <iostream>
+#include <assert.h>
 
 int counter;
 
@@ -18,30 +19,29 @@ class mock {
 };
 
 int main(int, char**) {
-    counter = 0;
-
     {
+        counter = 0;
+
         ScopedPtrCopy<mock> ptr1{new mock{}};
         ScopedPtrCopy<mock> ptr2 = ptr1;
         ScopedPtrCopy<mock> ptr3 = std::move(ptr1);
         ScopedPtrCopy<mock> ptr4 = ptr2;
-
-        std::cout << counter << " -> ";
     }
 
-    std::cout << counter << std::endl;
-
-    counter = 0;
+    assert(counter == 3);
 
     {
+        counter = 0;
+        
         ScopedPtrMove<mock> ptr1{new mock{}};
         ScopedPtrMove<mock> ptr2{std::move(ptr1)};
         ScopedPtrMove<mock> ptr3{std::move(ptr2)};
 
-        std::cout << counter << " -> ";
+        // Will not be compiled, copy ctor is deleted
+        // ScopedPtrMove<mock> ptr4{ptr3};
     }
 
-    std::cout << counter << std::endl;
+    assert(counter == 1);
 
     return 0;
 }

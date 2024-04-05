@@ -11,7 +11,7 @@ class ScopedPtrMove {
     ScopedPtrMove(const ScopedPtrMove& ptr) = delete;
 
     ScopedPtrMove(ScopedPtrMove&& ptr) : raw_(ptr.raw_) {
-        ptr.raw = nullptr;
+        ptr.raw_ = nullptr;
     }
 
     ~ScopedPtrMove() {
@@ -36,7 +36,7 @@ class ScopedPtrMove {
     }
 
     private:
-    t* raw_;
+    t* raw_ {nullptr};
 };
 
 template <typename t>

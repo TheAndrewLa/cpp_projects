@@ -84,9 +84,47 @@ SqMatrix::operator float() {
     return res;
 }
 
-SqMatrix SqMatrix::operator*(const SqMatrix& other) {
+SqMatrix SqMatrix::operator+(const SqMatrix& other) const {
     assert(mat_ != nullptr);
     assert(size_ > 0);
+
+    assert(other.mat_ != nullptr);
+    assert(other.size_ > 0);
+
+    if (size_ != other.size_)
+        throw std::invalid_argument("Size of matrices should be the same!");
+
+    SqMatrix res{*this};
+    res += other;
+
+    return res;
+}
+
+SqMatrix& SqMatrix::operator+=(const SqMatrix& other) {
+    assert(mat_ != nullptr);
+    assert(size_ > 0);
+
+    assert(other.mat_ != nullptr);
+    assert(other.size_ > 0);
+
+    if (size_ != other.size_)
+        throw std::invalid_argument("Size of matrices should be the same!");
+
+    for (usize i = 0; i < size_; i++) {
+        for (usize j = 0; j < size_; j++) {
+            mat_[j + (i * size_)] += other.mat_[j + (i * size_)];
+        }
+    }
+
+    return *this;
+}
+
+SqMatrix SqMatrix::operator*(const SqMatrix& other) const {
+    assert(mat_ != nullptr);
+    assert(size_ > 0);
+
+    assert(other.mat_ != nullptr);
+    assert(other.size_ > 0);
 
     if (size_ != other.size_)
         throw std::invalid_argument("Size of matrices should be the same!");
@@ -105,12 +143,6 @@ SqMatrix SqMatrix::operator*(const SqMatrix& other) {
 }
 
 SqMatrix& SqMatrix::operator*=(const SqMatrix& other) {
-    assert(mat_ != nullptr);
-    assert(size_ > 0);
-
-    if (size_ != other.size_)
-        throw std::invalid_argument("Matrices' size should be the same");
-
     *this = (*this) * other;
     return *this;
 }

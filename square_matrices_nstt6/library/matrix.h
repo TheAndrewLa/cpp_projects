@@ -49,13 +49,13 @@ class SqMatrix {
         return reinterpret_cast<const float*>(mat_ + (index * size_));
     }
 
-    SqMatrix& operator+(const SqMatrix& other);
+    SqMatrix operator+(const SqMatrix& other) const;
     SqMatrix& operator+=(const SqMatrix& other);
 
     // AND NOW.....
     // STRASSEN APPEARS (actually, no)
 
-    SqMatrix operator*(const SqMatrix& other);
+    SqMatrix operator*(const SqMatrix& other) const;
     SqMatrix& operator*=(const SqMatrix& other);
 
     SqMatrix operator*(float scalar) const noexcept;

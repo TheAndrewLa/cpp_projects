@@ -53,7 +53,7 @@ class SqMatrix {
     SqMatrix& operator+=(const SqMatrix& other);
 
     // AND NOW.....
-    // STRASSEN APPEARS (no)
+    // STRASSEN APPEARS (actually, no)
 
     SqMatrix operator*(const SqMatrix& other);
     SqMatrix& operator*=(const SqMatrix& other);

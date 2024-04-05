@@ -91,7 +91,7 @@ SqMatrix SqMatrix::operator*(const SqMatrix& other) {
     if (size_ != other.size_)
         throw std::invalid_argument("Size of matrices should be the same!");
 
-    SqMatrix result {size_};
+    SqMatrix result{size_};
 
     for (usize i = 0; i < size_; i++) {
         for (usize j = 0; j < size_; j++) {
@@ -119,7 +119,7 @@ SqMatrix SqMatrix::operator*(float scalar) const noexcept {
     assert(mat_ != nullptr);
     assert(size_ > 0);
 
-    SqMatrix result {*this};
+    SqMatrix result{*this};
 
     for (usize i = 0; i < size_; i++)
         for (usize j = 0; j < size_; j++)
@@ -147,7 +147,7 @@ std::string SqMatrix::to_string() const noexcept {
 
     for (usize i = 0; i < size_; i++) {
         for (usize j = 0; j < size_; j++)
-            oss << mat_[j + (i * size_)];
+            oss << mat_[j + (i * size_)] << ' ';
 
         oss << '\n';
     }

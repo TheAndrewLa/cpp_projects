@@ -1,6 +1,36 @@
 #include "matrix.h"
 #include <cstring>
 
+SqMatrix::RowConst::RowConst(float* mat, usize row_index, usize bounds) {
+    boundary_ = bounds;
+    row_ = const_cast<const float*>(mat + (row_index * bounds));
+}
+
+float SqMatrix::RowConst::operator[](usize index) const {
+    assert(row_ != nullptr);
+    assert(boundary_ > 0);
+
+    if (index >= boundary_)
+        throw std::out_of_range("Column index out of range!");
+
+    return row_[index];
+}
+
+SqMatrix::Row::Row(float* mat, usize row_index, usize bounds) {
+    boundary_ = bounds;
+    row_ = mat + (row_index * bounds);
+}
+
+float& SqMatrix::Row::operator[](usize index) {
+    assert(row_ != nullptr);
+    assert(boundary_ > 0);
+
+    if (index >= boundary_)
+        throw std::out_of_range("Column index out of range!");
+
+    return row_[index];
+}
+
 SqMatrix::SqMatrix() noexcept : SqMatrix(4) {}
 
 SqMatrix::SqMatrix(usize size) noexcept {
@@ -15,7 +45,7 @@ SqMatrix::SqMatrix(std::vector<float> diagonal) noexcept : SqMatrix(diagonal.siz
 
 SqMatrix::SqMatrix(const SqMatrix& matrix) {
     if (matrix.mat_ == nullptr || matrix.size_ == 0)
-        throw std::invalid_argument("'matrix' is broken!");
+        throw std::invalid_argument("Invalid matrix was given!");
 
     size_ = matrix.size_;
     mat_ = new float[size_ * size_];
@@ -24,7 +54,7 @@ SqMatrix::SqMatrix(const SqMatrix& matrix) {
 
 SqMatrix::SqMatrix(SqMatrix&& matrix) {
     if (mat_ == nullptr || size_ == 0)
-        throw std::invalid_argument("'matrix' is broken!");
+        throw std::invalid_argument("Invalid matrix was given!");
 
     size_ = matrix.size_;
     mat_ = matrix.mat_;
@@ -58,6 +88,18 @@ SqMatrix& SqMatrix::operator=(SqMatrix&& ref) {
     return *this;
 }
 
+SqMatrix::operator float() {
+    assert(mat_ != nullptr);
+    assert(size_ > 0);
+
+    float res = 0;
+    for (usize i = 0; i < size_; i++)
+        for (usize j = 0; j < size_; j++)
+            res += mat_[j + (i * size_)];
+
+    return res;
+}
+
 bool SqMatrix::operator!=(const SqMatrix& other) const {
     if (size_ != other.size_)
         return true;
@@ -72,16 +114,24 @@ bool SqMatrix::operator==(const SqMatrix& other) const {
     return std::memcmp(mat_, other.mat_, size_ * size_ * sizeof(float)) == 0;
 }
 
-SqMatrix::operator float() {
+SqMatrix::Row SqMatrix::operator[](usize index) {
     assert(mat_ != nullptr);
     assert(size_ > 0);
 
-    float res = 0;
-    for (usize i = 0; i < size_; i++)
-        for (usize j = 0; j < size_; j++)
-            res += mat_[j + (i * size_)];
+    if (index >= size_)
+        throw std::out_of_range("Row index out of range!");
 
-    return res;
+    return SqMatrix::Row{mat_, index, size_};
+}
+
+SqMatrix::RowConst SqMatrix::operator[](usize index) const {
+    assert(mat_ != nullptr);
+    assert(size_ > 0);
+
+    if (index >= size_)
+        throw std::out_of_range("Row index out of range!");
+
+    return SqMatrix::RowConst{mat_, index, size_};
 }
 
 SqMatrix SqMatrix::operator+(const SqMatrix& other) const {
@@ -143,6 +193,12 @@ SqMatrix SqMatrix::operator*(const SqMatrix& other) const {
 }
 
 SqMatrix& SqMatrix::operator*=(const SqMatrix& other) {
+    assert(mat_ != nullptr);
+    assert(size_ > 0);
+
+    assert(other.mat_ != nullptr);
+    assert(other.size_ > 0);
+
     *this = (*this) * other;
     return *this;
 }
@@ -169,6 +225,13 @@ SqMatrix& SqMatrix::operator*=(float scalar) noexcept {
             mat_[j + (i * size_)] *= scalar;
 
     return *this;
+}
+
+SqMatrix operator*(float scalar, const SqMatrix& mat) {
+    assert(mat.mat_ != nullptr);
+    assert(mat.size_ > 0);
+
+    return mat * scalar;
 }
 
 std::string SqMatrix::to_string() const noexcept {

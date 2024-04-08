@@ -66,18 +66,18 @@ TEST(SquareMatrices, Addition) {
     EXPECT_EQ(mat3[2][2], 12);
 }
 
-TEST(SquareMatrices, Multiplication) {}
-
 TEST(SquareMatrices, MultiplicationScalar) {
     SqMatrix mat1{std::vector<float>{1, 2, 3}};
-    SqMatrix mat2 = mat1 * 3;
+
+    mat1 *= 3;
+    SqMatrix mat2 = 3 * mat1;
 
     EXPECT_EQ(mat1.size(), mat2.size());
     EXPECT_EQ(mat2.size(), 3);
 
-    EXPECT_EQ(mat2[0][0], 3);
-    EXPECT_EQ(mat2[1][1], 6);
-    EXPECT_EQ(mat2[2][2], 9);
+    EXPECT_EQ(mat2[0][0], 9);
+    EXPECT_EQ(mat2[1][1], 18);
+    EXPECT_EQ(mat2[2][2], 27);
 
     EXPECT_EQ(mat2[1][0], 0);
     EXPECT_EQ(mat2[2][0], 0);

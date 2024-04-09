@@ -52,7 +52,7 @@ UnaryOperation::~UnaryOperation() {
 std::string Add::to_string() const {
     std::ostringstream oss;
     oss << '(' << left_->to_string() << ')';
-    oss << " + ";
+    oss << '+';
     oss << '(' << right_->to_string() << ')';
 
     return oss.str();
@@ -69,7 +69,7 @@ Expression* Add::copy() const {
 std::string Sub::to_string() const {
     std::ostringstream oss;
     oss << '(' << left_->to_string() << ')';
-    oss << " - ";
+    oss << '-';
     oss << '(' << right_->to_string() << ')';
 
     return oss.str();
@@ -86,7 +86,7 @@ Expression* Sub::copy() const {
 std::string Mul::to_string() const {
     std::ostringstream oss;
     oss << '(' << left_->to_string() << ')';
-    oss << " * ";
+    oss << '*';
     oss << '(' << right_->to_string() << ')';
 
     return oss.str();
@@ -105,7 +105,7 @@ Expression* Mul::copy() const {
 std::string Div::to_string() const {
     std::ostringstream oss;
     oss << '(' << left_->to_string() << ')';
-    oss << " / ";
+    oss << '/';
     oss << '(' << right_->to_string() << ')';
 
     return oss.str();
@@ -138,9 +138,11 @@ Expression* Neg::copy() const {
     return new Neg{main_->copy()};
 }
 
+Exp::Exp(int value) : UnaryOperation(new Value{value}) {}
+
 std::string Exp::to_string() const {
     std::ostringstream oss;
-    oss << "exp";
+    oss << "e^";
     oss << '(' << main_->to_string() << ')';
 
     return oss.str();
@@ -154,8 +156,27 @@ Expression* Exp::copy() const {
     return new Exp{main_->copy()};
 }
 
+Ln::Ln(int value) : UnaryOperation(new Value{value}) {}
+
+std::string Ln::to_string() const {
+    std::ostringstream oss;
+    oss << "ln";
+    oss << '(' << main_->to_string() << ')';
+
+    return oss.str();
+}
+
+Expression* Ln::differentiate(char var) const {
+    auto exp = new Div{new Value{1}, main_->copy()};
+    return new Mul{main_->differentiate(var), exp};
+}
+
+Expression* Ln::copy() const {
+    return new Ln{main_->copy()};
+}
+
 Value::Value() : value_(0) {}
-Value::Value(float value) : value_(value) {}
+Value::Value(int value) : value_(value) {}
 
 std::string Value::to_string() const {
     return std::to_string(value_);

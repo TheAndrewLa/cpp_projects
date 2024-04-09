@@ -130,6 +130,19 @@ class Exp : public UnaryOperation {
     public:
     using UnaryOperation::UnaryOperation;
 
+    explicit Exp(int value);
+
+    virtual std::string to_string() const;
+    virtual Expression* differentiate(char var) const;
+    virtual Expression* copy() const;
+};
+
+class Ln : public UnaryOperation {
+    public:
+    using UnaryOperation::UnaryOperation;
+    
+    explicit Ln(int value);
+
     virtual std::string to_string() const;
     virtual Expression* differentiate(char var) const;
     virtual Expression* copy() const;
@@ -139,7 +152,7 @@ class Value : public Expression {
     public:
     Value();
 
-    Value(float value);
+    Value(int value);
     
     Value(const Value& value) = default;
     Value(Value&& value) = default;
@@ -151,7 +164,7 @@ class Value : public Expression {
     virtual Expression* copy() const;
 
     private:
-    float value_;
+    int value_;
 };
 
 class Variable : public Expression {

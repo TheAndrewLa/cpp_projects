@@ -8,7 +8,8 @@ int main() {
     auto diff_x = exp->differentiate('x');
     auto diff_y = exp->differentiate('y');
 
-    std::cout << diff_x->to_string() << '\n' << diff_y->to_string() << '\n';
+    std::cout << "df/dx = " << diff_x->to_string() << '\n';
+    std::cout << "df/dy = " << diff_y->to_string() << '\n';
 
     delete exp;
     delete diff_x;

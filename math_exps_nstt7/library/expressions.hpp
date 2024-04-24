@@ -18,7 +18,7 @@ struct Expression {
     virtual ~Expression() = default;
 
     virtual std::string to_string() const = 0;
-    virtual Expression* differentiate(char var) const = 0;
+    virtual Expression* to_differentiated(char var) const = 0;
 
     // A deep copy of expression
     virtual Expression* copy() const = 0;
@@ -28,7 +28,8 @@ struct Expression {
     // virtual void simplify() = 0;
 };
 
-/*-------------------------------------
+/*
+--------------------------------------
     My hirerarchy looks like this
 
     EXPRESSION
@@ -48,22 +49,28 @@ struct Expression {
         VALUE
         |
         VARIABLE
---------------------------------------*/
+--------------------------------------
+*/
 
 class BinaryOperation : public Expression {
     public:
     BinaryOperation() = delete;
 
-    BinaryOperation(Expression* left, Expression* right);
+    BinaryOperation(Expression* left, Expression* right, char sym);
     
     BinaryOperation(const BinaryOperation& operation);
     BinaryOperation(BinaryOperation&& operation);
 
     virtual ~BinaryOperation();
 
+    std::string to_string() const;
+
     protected:
     Expression* left_;
     Expression* right_;
+
+    private:
+    char sym_;
 };
 
 class UnaryOperation : public Expression {
@@ -83,47 +90,51 @@ class UnaryOperation : public Expression {
 
 class Add : public BinaryOperation {
     public:
-    using BinaryOperation::BinaryOperation;
+    Add(Expression* left, Expression* right);
+    Add(const Add& operation);
+    Add(Add&& operation);
 
-    virtual std::string to_string() const;
-    virtual Expression* differentiate(char var) const;
-    virtual Expression* copy() const;
+    Expression* to_differentiated(char var) const;
+    Expression* copy() const;
 };
 
 class Sub : public BinaryOperation {
     public:
-    using BinaryOperation::BinaryOperation;
+    Sub(Expression* left, Expression* right);
+    Sub(const Sub& operation);
+    Sub(Sub&& operation);
 
-    virtual std::string to_string() const;
-    virtual Expression* differentiate(char var) const;
-    virtual Expression* copy() const;
+    Expression* to_differentiated(char var) const;
+    Expression* copy() const;
 };
 
 class Mul : public BinaryOperation {
     public:
-    using BinaryOperation::BinaryOperation;
+    Mul(Expression* left, Expression* right);
+    Mul(const Mul& operation);
+    Mul(Mul&& operation);
 
-    virtual std::string to_string() const;
-    virtual Expression* differentiate(char var) const;
-    virtual Expression* copy() const;
+    Expression* to_differentiated(char var) const;
+    Expression* copy() const;
 };
 
 class Div : public BinaryOperation {
     public:
-    using BinaryOperation::BinaryOperation;
+    Div(Expression* left, Expression* right);
+    Div(const Div& operation);
+    Div(Div&& operation);
 
-    virtual std::string to_string() const;
-    virtual Expression* differentiate(char var) const;
-    virtual Expression* copy() const;
+    Expression* to_differentiated(char var) const;
+    Expression* copy() const;
 };
 
 class Neg : public UnaryOperation {
     public:
     using UnaryOperation::UnaryOperation;
 
-    virtual std::string to_string() const;
-    virtual Expression* differentiate(char var) const;
-    virtual Expression* copy() const;
+    std::string to_string() const;
+    Expression* to_differentiated(char var) const;
+    Expression* copy() const;
 };
 
 class Exp : public UnaryOperation {
@@ -132,39 +143,39 @@ class Exp : public UnaryOperation {
 
     explicit Exp(int value);
 
-    virtual std::string to_string() const;
-    virtual Expression* differentiate(char var) const;
-    virtual Expression* copy() const;
+    std::string to_string() const;
+    Expression* to_differentiated(char var) const;
+    Expression* copy() const;
 };
 
 class Ln : public UnaryOperation {
     public:
     using UnaryOperation::UnaryOperation;
-    
+
     explicit Ln(int value);
 
-    virtual std::string to_string() const;
-    virtual Expression* differentiate(char var) const;
-    virtual Expression* copy() const;
+    std::string to_string() const;
+    Expression* to_differentiated(char var) const;
+    Expression* copy() const;
 };
 
 class Value : public Expression {
     public:
-    Value();
+    Value() = default;
 
     Value(int value);
-    
+
     Value(const Value& value) = default;
     Value(Value&& value) = default;
 
     ~Value() = default;
 
-    virtual std::string to_string() const;
-    virtual Expression* differentiate(char var) const;
-    virtual Expression* copy() const;
+    std::string to_string() const;
+    Expression* to_differentiated(char var) const;
+    Expression* copy() const;
 
     private:
-    int value_;
+    int value_ = 0;
 };
 
 class Variable : public Expression {
@@ -178,9 +189,9 @@ class Variable : public Expression {
 
     ~Variable() = default;
 
-    virtual std::string to_string() const;
-    virtual Expression* differentiate(char var) const;
-    virtual Expression* copy() const;
+    std::string to_string() const;
+    Expression* to_differentiated(char var) const;
+    Expression* copy() const;
 
     private:
     char name_;

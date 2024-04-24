@@ -2,22 +2,25 @@
 
 /// @todo FILL THIS CODE WITH ASSERTS
 
-BinaryOperation::BinaryOperation(Expression* left, Expression* right) {
+BinaryOperation::BinaryOperation(Expression* left, Expression* right, char sym) {
     if (left == nullptr || right == nullptr)
         throw std::invalid_argument("Both expressions has to be valid!");
 
     left_ = left;
     right_ = right;
+    sym_ = sym;
 }
 
 BinaryOperation::BinaryOperation(const BinaryOperation& operation) {
     left_ = operation.left_->copy();
     right_ = operation.right_->copy();
+    sym_ = operation.sym_;
 }
 
 BinaryOperation::BinaryOperation(BinaryOperation&& operation) {
     left_ = operation.left_;
     right_ = operation.right_;
+    sym_ = operation.sym_;
 
     operation.left_ = nullptr;
     operation.right_ = nullptr;
@@ -28,6 +31,15 @@ BinaryOperation::~BinaryOperation() {
     delete right_;
 }
 
+std::string BinaryOperation::to_string() const {
+    std::ostringstream stream;
+    stream << '(' << left_->to_string() << ')';
+    stream << sym_;
+    stream << '(' << right_->to_string() << ')';
+
+    return stream.str();
+}
+
 UnaryOperation::UnaryOperation(Expression* main) {
     if (main == nullptr)
         throw std::invalid_argument("Expression has to be valid!");
@@ -36,12 +48,11 @@ UnaryOperation::UnaryOperation(Expression* main) {
 }
 
 UnaryOperation::UnaryOperation(const UnaryOperation& operation) {
-    main_ = operation.main_->copy();   
+    main_ = operation.main_->copy();
 }
 
 UnaryOperation::UnaryOperation(UnaryOperation&& operation) {
     main_ = operation.main_;
-
     operation.main_ = nullptr;
 }
 
@@ -49,80 +60,86 @@ UnaryOperation::~UnaryOperation() {
     delete main_;
 }
 
-std::string Add::to_string() const {
-    std::ostringstream oss;
-    oss << '(' << left_->to_string() << ')';
-    oss << '+';
-    oss << '(' << right_->to_string() << ')';
+Add::Add(Expression* left, Expression* right) : BinaryOperation(left, right, '+') {}
+Add::Add(const Add& ref) : BinaryOperation(ref) {}
+Add::Add(Add&& ref) : BinaryOperation(ref) {}
 
-    return oss.str();
-}
+Expression* Add::to_differentiated(char var) const {
+    assert(left_ != nullptr);
+    assert(right_ != nullptr);
 
-Expression* Add::differentiate(char var) const {
-    return new Add{left_->differentiate(var), right_->differentiate(var)};
+    return new Add{left_->to_differentiated(var), right_->to_differentiated(var)};
 }
 
 Expression* Add::copy() const {
+    assert(left_ != nullptr);
+    assert(right_ != nullptr);
+
     return new Add{left_->copy(), right_->copy()};
 }
 
-std::string Sub::to_string() const {
-    std::ostringstream oss;
-    oss << '(' << left_->to_string() << ')';
-    oss << '-';
-    oss << '(' << right_->to_string() << ')';
+Sub::Sub(Expression* left, Expression* right) : BinaryOperation(left, right, '-') {}
+Sub::Sub(const Sub& ref) : BinaryOperation(ref) {}
+Sub::Sub(Sub&& ref) : BinaryOperation(ref) {}
 
-    return oss.str();
-}
+Expression* Sub::to_differentiated(char var) const {
+    assert(left_ != nullptr);
+    assert(right_ != nullptr);
 
-Expression* Sub::differentiate(char var) const {
-    return new Sub{left_->differentiate(var), right_->differentiate(var)};
+    return new Sub{left_->to_differentiated(var), right_->to_differentiated(var)};
 }
 
 Expression* Sub::copy() const {
+    assert(left_ != nullptr);
+    assert(right_ != nullptr);
+
     return new Sub{left_->copy(), right_->copy()};
 }
 
-std::string Mul::to_string() const {
-    std::ostringstream oss;
-    oss << '(' << left_->to_string() << ')';
-    oss << '*';
-    oss << '(' << right_->to_string() << ')';
+Mul::Mul(Expression* left, Expression* right) : BinaryOperation(left, right, '*') {}
+Mul::Mul(const Mul& ref) : BinaryOperation(ref) {}
+Mul::Mul(Mul&& ref) : BinaryOperation(ref) {}
 
-    return oss.str();
-}
+Expression* Mul::to_differentiated(char var) const {
+    assert(left_ != nullptr);
+    assert(right_ != nullptr);
 
-Expression* Mul::differentiate(char var) const {
-    auto left = new Mul{left_->differentiate(var), right_->copy()};
-    auto right = new Mul{left_->copy(), right_->differentiate(var)};
+    auto left = new Mul{left_->to_differentiated(var), right_->copy()};
+    auto right = new Mul{left_->copy(), right_->to_differentiated(var)};
     return new Add{left, right};
 }
 
 Expression* Mul::copy() const {
+    assert(left_ != nullptr);
+    assert(right_ != nullptr);
+
     return new Mul{left_->copy(), right_->copy()};
 }
 
-std::string Div::to_string() const {
-    std::ostringstream oss;
-    oss << '(' << left_->to_string() << ')';
-    oss << '/';
-    oss << '(' << right_->to_string() << ')';
+Div::Div(Expression* left, Expression* right) : BinaryOperation(left, right, '/') {}
+Div::Div(const Div& ref) : BinaryOperation(ref) {}
+Div::Div(Div&& ref) : BinaryOperation(ref) {}
 
-    return oss.str();
-}
+Expression* Div::to_differentiated(char var) const {
+    assert(left_ != nullptr);
+    assert(right_ != nullptr);
 
-Expression* Div::differentiate(char var) const {
-    auto left = new Mul{left_->differentiate(var), right_->copy()};
-    auto right = new Mul{left_->copy(), right_->differentiate(var)};
+    auto left = new Mul{left_->to_differentiated(var), right_->copy()};
+    auto right = new Mul{left_->copy(), right_->to_differentiated(var)};
 
     return new Div{new Sub{left, right}, new Mul{right_->copy(), right_->copy()}};
 }
 
 Expression* Div::copy() const {
+    assert(left_ != nullptr);
+    assert(right_ != nullptr);
+
     return new Div{left_->copy(), right_->copy()};
 }
 
 std::string Neg::to_string() const {
+    assert(main_ != nullptr);
+
     std::ostringstream oss;
     oss << '-';
     oss << '(' << main_->to_string() << ')';
@@ -130,17 +147,21 @@ std::string Neg::to_string() const {
     return oss.str();
 }
 
-Expression* Neg::differentiate(char var) const {
-    return new Neg{main_->differentiate(var)};
+Expression* Neg::to_differentiated(char var) const {
+    assert(main_ != nullptr);
+    return new Neg{main_->to_differentiated(var)};
 }
 
 Expression* Neg::copy() const {
+    assert(main_ != nullptr);
     return new Neg{main_->copy()};
 }
 
 Exp::Exp(int value) : UnaryOperation(new Value{value}) {}
 
 std::string Exp::to_string() const {
+    assert(main_ != nullptr);
+
     std::ostringstream oss;
     oss << "e^";
     oss << '(' << main_->to_string() << ')';
@@ -148,17 +169,21 @@ std::string Exp::to_string() const {
     return oss.str();
 }
 
-Expression* Exp::differentiate(char var) const {
-    return new Mul{main_->differentiate(var), new Exp{main_->copy()}};
+Expression* Exp::to_differentiated(char var) const {
+    assert(main_ != nullptr);
+    return new Mul{main_->to_differentiated(var), new Exp{main_->copy()}};
 }
 
 Expression* Exp::copy() const {
+    assert(main_ != nullptr);
     return new Exp{main_->copy()};
 }
 
 Ln::Ln(int value) : UnaryOperation(new Value{value}) {}
 
 std::string Ln::to_string() const {
+    assert(main_ != nullptr);
+
     std::ostringstream oss;
     oss << "ln";
     oss << '(' << main_->to_string() << ')';
@@ -166,23 +191,23 @@ std::string Ln::to_string() const {
     return oss.str();
 }
 
-Expression* Ln::differentiate(char var) const {
-    auto exp = new Div{new Value{1}, main_->copy()};
-    return new Mul{main_->differentiate(var), exp};
+Expression* Ln::to_differentiated(char var) const {
+    assert(main_ != nullptr);
+    return new Mul{main_->to_differentiated(var), new Div{new Value{1}, main_->copy()}};
 }
 
 Expression* Ln::copy() const {
+    assert(main_ != nullptr);
     return new Ln{main_->copy()};
 }
 
-Value::Value() : value_(0) {}
 Value::Value(int value) : value_(value) {}
 
 std::string Value::to_string() const {
     return std::to_string(value_);
 }
 
-Expression* Value::differentiate(char var) const {
+Expression* Value::to_differentiated(char var) const {
     return new Value;
 }
 
@@ -201,13 +226,13 @@ std::string Variable::to_string() const {
     return std::string{name_};
 }
 
-Expression* Variable::differentiate(char var) const {
+Expression* Variable::to_differentiated(char var) const {
     if (var == name_)
         return new Value{1};
 
-    return new Value;
+    return new Value{0};
 }
 
 Expression* Variable::copy() const {
-    return new Variable(name_);
+    return new Variable{name_};
 }

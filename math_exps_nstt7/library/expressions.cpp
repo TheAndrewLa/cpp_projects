@@ -1,7 +1,5 @@
 #include "expressions.hpp"
 
-/// @todo FILL THIS CODE WITH ASSERTS
-
 BinaryOperation::BinaryOperation(Expression* left, Expression* right, char sym) {
     if (left == nullptr || right == nullptr)
         throw std::invalid_argument("Both expressions has to be valid!");
@@ -40,11 +38,20 @@ std::string BinaryOperation::to_string() const {
     return stream.str();
 }
 
-UnaryOperation::UnaryOperation(Expression* main) {
+UnaryOperation::UnaryOperation(Expression* main, char sym) {
     if (main == nullptr)
         throw std::invalid_argument("Expression has to be valid!");
     
     main_ = main;
+    sym_ = sym;
+}
+
+UnaryOperation::UnaryOperation(Expression* main) {
+    if (main == nullptr)
+        throw std::invalid_argument("Expression has to be valid!");
+
+    main_ = main;
+    sym_ = '\0';
 }
 
 UnaryOperation::UnaryOperation(const UnaryOperation& operation) {
@@ -58,6 +65,14 @@ UnaryOperation::UnaryOperation(UnaryOperation&& operation) {
 
 UnaryOperation::~UnaryOperation() {
     delete main_;
+}
+
+std::string UnaryOperation::to_string() const {
+    std::ostringstream stream;
+    stream << sym_;
+    stream << '(' << main_->to_string() << ')';
+
+    return stream.str();
 }
 
 Add::Add(Expression* left, Expression* right) : BinaryOperation(left, right, '+') {}
@@ -137,15 +152,7 @@ Expression* Div::copy() const {
     return new Div{left_->copy(), right_->copy()};
 }
 
-std::string Neg::to_string() const {
-    assert(main_ != nullptr);
-
-    std::ostringstream oss;
-    oss << '-';
-    oss << '(' << main_->to_string() << ')';
-
-    return oss.str();
-}
+Neg::Neg(Expression* main) : UnaryOperation(main, '-') {}
 
 Expression* Neg::to_differentiated(char var) const {
     assert(main_ != nullptr);

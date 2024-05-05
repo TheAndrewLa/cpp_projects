@@ -57,19 +57,18 @@ class BinaryOperation : public Expression {
     BinaryOperation() = delete;
 
     BinaryOperation(Expression* left, Expression* right, char sym);
+    BinaryOperation(Expression* left, Expression* right);
     
     BinaryOperation(const BinaryOperation& operation);
     BinaryOperation(BinaryOperation&& operation);
 
     virtual ~BinaryOperation();
 
-    std::string to_string() const;
+    virtual std::string to_string() const;
 
     protected:
     Expression* left_;
     Expression* right_;
-
-    private:
     char sym_;
 };
 
@@ -77,6 +76,7 @@ class UnaryOperation : public Expression {
     public:
     UnaryOperation() = delete;
 
+    UnaryOperation(Expression* expression, char sym);
     explicit UnaryOperation(Expression* expression);
     
     UnaryOperation(const UnaryOperation& operation);
@@ -84,8 +84,11 @@ class UnaryOperation : public Expression {
 
     virtual ~UnaryOperation();
 
+    virtual std::string to_string() const;
+
     protected:
     Expression* main_;
+    char sym_;
 };
 
 class Add : public BinaryOperation {
@@ -130,9 +133,10 @@ class Div : public BinaryOperation {
 
 class Neg : public UnaryOperation {
     public:
-    using UnaryOperation::UnaryOperation;
+    Neg(Expression* main);
+    Neg(const Neg& operation);
+    Neg(Neg&& operation);
 
-    std::string to_string() const;
     Expression* to_differentiated(char var) const;
     Expression* copy() const;
 };

@@ -58,7 +58,7 @@ class BinaryOperation : public Expression {
 
     BinaryOperation(Expression* left, Expression* right, char sym);
     BinaryOperation(Expression* left, Expression* right);
-    
+
     BinaryOperation(const BinaryOperation& operation);
     BinaryOperation(BinaryOperation&& operation);
 

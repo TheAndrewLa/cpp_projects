@@ -2,22 +2,22 @@
 #include <random>
 #include <exception>
 
-/// @todo write a concept
-
 template <typename T>
 concept key_type = requires(const std::remove_reference_t<T>& a, const std::remove_reference_t<T>& b) {
     {a < b} -> std::convertible_to<bool>;
     {a > b} -> std::convertible_to<bool>;
     {a == b} -> std::convertible_to<bool>;
     {a != b} -> std::convertible_to<bool>;
+
+    std::movable<T>;
     std::copyable<T>;
     std::destructible<T>;
 };
 
-template <typename>
+template <key_type>
 class Treap;
 
-template <typename T>
+template <key_type T>
 void split_treap(typename Treap<T>::Node* root, const T& key, typename Treap<T>::Node** left, typename Treap<T>::Node** right) noexcept {
     if (root == nullptr) {
         *left = nullptr;
@@ -44,7 +44,7 @@ void split_treap(typename Treap<T>::Node* root, const T& key, typename Treap<T>:
     }
 }
 
-template <typename T>
+template <key_type T>
 typename Treap<T>::Node* merge_nodes(typename Treap<T>::Node* t1, typename Treap<T>::Node* t2) noexcept {
     if (t1 == nullptr)
         return t2;
@@ -62,7 +62,7 @@ typename Treap<T>::Node* merge_nodes(typename Treap<T>::Node* t1, typename Treap
     }
 }
 
-template <typename T>
+template <key_type T>
 typename Treap<T>::Node* copy_node(typename Treap<T>::Node* node) noexcept {
     if (node == nullptr)
         return nullptr;
@@ -74,7 +74,7 @@ typename Treap<T>::Node* copy_node(typename Treap<T>::Node* node) noexcept {
     return original;
 }
 
-template <typename T>
+template <key_type T>
 void delete_node(typename Treap<T>::Node* node) noexcept {
     if (node == nullptr)
         return;
@@ -85,7 +85,7 @@ void delete_node(typename Treap<T>::Node* node) noexcept {
 }
 
 // T is for priority
-template <typename T>
+template <key_type T>
 class Treap {
 public:
     struct Node {

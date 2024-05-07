@@ -9,19 +9,10 @@ template <usize N, usize M = 2>
 struct is_prime : std::conditional_t<N == M, std::integral_constant<bool, true>, 
 std::conditional_t<N % M == 0, std::integral_constant<bool, false>, is_prime<N, M + 1>>> {};
 
-template <>
-struct is_prime<2, 2> : std::integral_constant<bool, true> {};
-
-template <>
-struct is_prime<3, 2> : std::integral_constant<bool, true> {};
-
 template <usize N, usize D = 2, usize I = 0>
 struct prime : std::conditional_t<is_prime<D>::value,
 std::conditional_t<N == I, std::integral_constant<usize, D>, prime<N, D + 1, I + 1>>,
-prime<N, D + 1, I>>{};
-
-template <>
-struct prime<0, 2, 0> : std::integral_constant<usize, 2> {};
+prime<N, D + 1, I>> {};
 
 int main(int, char**) {
     static_assert(is_prime<34>{} == false);

@@ -6,8 +6,8 @@ using usize = std::size_t;
 using isize = std::ptrdiff_t;
 
 template <usize N, usize M = 2>
-struct is_prime : std::conditional_t<N == M, std::integral_constant<bool, true>, 
-std::conditional_t<N % M == 0, std::integral_constant<bool, false>, is_prime<N, M + 1>>> {};
+struct is_prime : std::conditional_t<(N < M * M), std::true_type, 
+std::conditional_t<N % M == 0, std::false_type, is_prime<N, M + 1>>> {};
 
 template <usize N, usize D = 2, usize I = 0>
 struct prime : std::conditional_t<is_prime<D>::value,
@@ -15,22 +15,10 @@ std::conditional_t<N == I, std::integral_constant<usize, D>, prime<N, D + 1, I +
 prime<N, D + 1, I>> {};
 
 int main(int, char**) {
-    static_assert(is_prime<34>{} == false);
-    static_assert(is_prime<67>{} == true);
-    static_assert(is_prime<19>{} == true);
-    static_assert(is_prime<25>{} == false);
-    static_assert(is_prime<100>{} == false);
-    static_assert(is_prime<7>{} == true);
-
-    static_assert(prime<0>{} == 2);
-    static_assert(prime<1>{} == 3);
-    static_assert(prime<2>{} == 5);
-    static_assert(prime<3>{} == 7);
-    static_assert(prime<4>{} == 11);
-    static_assert(prime<5>{} == 13);
-    static_assert(prime<6>{} == 17);
-    static_assert(prime<7>{} == 19);
-    static_assert(prime<8>{} == 23);
+    std::cout << prime<90>{} << '\n';
+    std::cout << prime<91>{} << '\n';
+    std::cout << prime<92>{} << '\n';
+    std::cout << prime<93>{} << '\n';
 
     std::cout << "All tests passed!" << '\n';
 

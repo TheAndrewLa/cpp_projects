@@ -118,21 +118,21 @@ class buffered_fstream : public fstream {
 
     ~buffered_fstream();
 
-    void write_int(int32 value) = 0;
-    void write_uint(uint32 value) = 0;
+    void write_int(int32 value);
+    void write_uint(uint32 value);
 
-    void write_float(real32 value) = 0;
-    void write_double(real64 value) = 0;
+    void write_float(real32 value);
+    void write_double(real64 value);
 
-    void write_char(char8 value) = 0;
+    void write_char(char8 value);
 
-    int32 read_int() = 0;
-    uint32 read_uint() = 0;
+    int32 read_int();
+    uint32 read_uint();
 
-    real32 read_float() = 0;
-    real64 read_double() = 0;
+    real32 read_float();
+    real64 read_double();
 
-    char8 read_char() = 0;
+    char8 read_char();
 
     bool is_open() const;
     bool eof() const;

@@ -88,21 +88,21 @@ class sstream : public io_stream {
 
     ~sstream() = default;
 
-    virtual void write_int(int32 value) = 0;
-    virtual void write_uint(uint32 value) = 0;
+    virtual void write_int(int32 value);
+    virtual void write_uint(uint32 value);
 
-    virtual void write_float(real32 value) = 0;
-    virtual void write_double(real64 value) = 0;
+    virtual void write_float(real32 value);
+    virtual void write_double(real64 value);
 
-    virtual void write_char(char8 value) = 0;
+    virtual void write_char(char8 value);
 
-    virtual int32 read_int() = 0;
-    virtual uint32 read_uint() = 0;
+    virtual int32 read_int();
+    virtual uint32 read_uint();
 
-    virtual real32 read_float() = 0;
-    virtual real64 read_double() = 0;
+    virtual real32 read_float();
+    virtual real64 read_double();
 
-    virtual char8 read_char() = 0;
+    virtual char8 read_char();
 
     virtual bool is_open() const;
     virtual bool eof() const;
@@ -140,5 +140,6 @@ class buffered_fstream : public fstream {
 
     private:
     FILE* handle_{nullptr};
-    char8* buffer_{nullptr};
+    char8* writing_buffer_{nullptr};
+    char8* reading_buffer_{nullptr};
 };

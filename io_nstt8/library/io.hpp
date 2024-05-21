@@ -112,8 +112,33 @@ class sstream : public io_stream {
     std::string* handle_{nullptr};
 };
 
-/// @todo later
+class buffered_fstream : public fstream {
+    buffered_fstream() = default;
+    buffered_fstream(const char* filename, usize buffer_size);
 
-class buffered_fstream : public fstream {};
+    ~buffered_fstream();
 
-class buffered_sstream : public sstream {};
+    void write_int(int32 value) = 0;
+    void write_uint(uint32 value) = 0;
+
+    void write_float(real32 value) = 0;
+    void write_double(real64 value) = 0;
+
+    void write_char(char8 value) = 0;
+
+    int32 read_int() = 0;
+    uint32 read_uint() = 0;
+
+    real32 read_float() = 0;
+    real64 read_double() = 0;
+
+    char8 read_char() = 0;
+
+    bool is_open() const;
+    bool eof() const;
+    void close();
+
+    private:
+    FILE* handle_{nullptr};
+    char8* buffer_{nullptr};
+};

@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.2)
 project(Treap)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(LIB ${CMAKE_SOURCE_DIR}/library/treap.cpp ${CMAKE_SOURCE_DIR}/library/treap.h)
+set(LIB ${CMAKE_SOURCE_DIR}/library/treap.hpp)
 
 set(MAIN_SOURCE ${CMAKE_SOURCE_DIR}/main.cpp)
 set(TEST_SOURCE ${CMAKE_SOURCE_DIR}/main_test.cpp)

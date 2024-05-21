@@ -1,7 +1,7 @@
-#include "library/treap.h"
+#include "library/treap.hpp"
 #include <iostream>
 
 int main(int, char**) {
-    std::cout << "Main file without any tests" << std::endl;
+    Treap<int> m;
     return 0;
 }

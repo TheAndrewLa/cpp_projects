@@ -1,121 +1,5 @@
 #include "io.hpp"
 
-buffer::buffer(usize size) : ptr_(new char8[size]), size_(size), current_(0) {}
-
-buffer::~buffer() {
-    delete [] ptr_;
-}
-
-void buffer::push_symbols(char* str, usize n) {
-    if (current_ + n > size_) {
-        throw std::runtime_error{"Buffer is full!"};
-    }
-
-    snprintf(ptr_ + current_, n, "%s", str);
-    current_ += n;
-}
-
-char8* buffer::get_buffer() {
-    return ptr_;
-}
-
-buffered_ifstream::buffered_ifstream(FILE* fd, usize size) : buffer(size) {
-    char8 sym = '\0';
-    usize count = 0;
-
-    while((sym = fgetc(fd)) != EOF || count < size_) ptr_[count++] = sym;
-}
-
-char8 buffered_ifstream::read_char() {
-    if (current_ < size_) {
-        char8 sym;
-
-        current_ += sscanf(ptr_ + current_, "%c", &sym);
-        return sym;
-    }
-
-    throw std::runtime_error{"Buffer is empty"};
-}
-
-real64 buffered_ifstream::read_double() {
-    if (current_ < size_) {
-        real64 val;
-        
-        current_ += sscanf(ptr_ + current_, "%lf", &val);
-        return val;
-    }
-
-    throw std::runtime_error{"Buffer is empty"};
-}
-
-real32 buffered_ifstream::read_float() {
-    if (current_ < size_) {
-        real32 val;
-        
-        current_ += sscanf(ptr_ + current_, "%f", &val);
-        return val;
-    }
-
-    throw std::runtime_error{"Buffer is empty"};
-}
-
-int32 buffered_ifstream::read_int() {
-    if (current_ < size_) {
-        int32 val;
-
-        current_ += sscanf(ptr_ + current_, "%d", &val);
-        return val;
-    }
-
-    throw std::runtime_error{"Buffer is empty"};
-}
-
-uint32 buffered_ifstream::read_uint() {
-    if (current_ < size_) {
-        uint32 val;
-
-        current_ += sscanf(ptr_ + current_, "%u", &val);
-        return val;
-    }
-
-    throw std::runtime_error{"Buffer is empty"};
-}
-
-buffered_ofstream::buffered_ofstream(usize size) : buffer(size) {}
-
-void buffered_ofstream::write_char(char8 value) {
-    char8 sym = value;
-    push_symbols(&sym, 1);
-}
-
-void buffered_ofstream::write_double(real64 value) {
-    char str[64];
-    usize len = sprintf(str, "%lf", value);
-
-    push_symbols(str, len);
-}
-
-void buffered_ofstream::write_float(real32 value) {
-    char str[64];
-    usize len = sprintf(str, "%f", value);
-
-    push_symbols(str, len);
-}
-
-void buffered_ofstream::write_int(int32 value) {
-    char str[16];
-    usize len = sprintf(str, "%d", value);
-
-    push_symbols(str, len);
-}
-
-void buffered_ofstream::write_uint(uint32 value) {
-    char str[16];
-    usize len = sprintf(str, "%u", value);
-
-    push_symbols(str, len);
-}
-
 fstream::fstream(const std::string& filename) : handle_(fopen(filename.c_str(), "a+")) {}
 fstream::fstream(const char* filename) : handle_(fopen(filename, "a+")) {}
 
@@ -124,7 +8,7 @@ fstream::~fstream() {
 }
 
 bool fstream::eof() const {
-    return static_cast<bool>(std::feof(handle_));
+    return static_cast<bool>(feof(handle_));
 }
 
 bool fstream::is_open() const {
@@ -258,119 +142,154 @@ char8 sstream::read_char() {
     return var;
 }
 
-//
-buffered_fstream::buffered_fstream(const char* filename, usize buffer_size) :
-fstream(filename), buffered_ifstream(handle_, buffer_size), buffered_ofstream(buffer_size) {}
+buffer::buffer(usize size) : ptr_(new char8[size]()), size_(size), current_(0) {}
 
-// Using benefits of non-virtual diamond inheritance
-
-char8* buffered_fstream::get_reading_buffer() {
-    return buffered_ifstream::get_buffer();
+buffer::~buffer() {
+    delete [] ptr_;
 }
 
-char8* buffered_fstream::get_writing_buffer() {
-    return buffered_ofstream::get_buffer();
+buffered_ifstream::buffered_ifstream(FILE* file, usize size) : buffer(size), handle_(file) {
+    read_buffer();
 }
 
-// Using try-catch semantics (try to write to a buffer and if exceptions was thrown)
-// Here's so much copy-pasted code, but in my organization of code I couldn't do better
+void buffered_ifstream::read_buffer() {
+    assert(handle_ != nullptr);
+    assert(size_ > 0);
 
-void buffered_fstream::write_char(char8 value) {
-    try {
-        buffered_ofstream::write_char(value);
-    } catch (...) {
-        fstream::write_char(value);
-    }
-}
+    char8 sym;
+    usize i = 0;
 
-void buffered_fstream::write_float(real32 value) {
-    try {
-        buffered_ofstream::write_float(value);
-    } catch (...) {
-        fstream::write_float(value);
-    }
-}
-
-void buffered_fstream::write_double(real64 value) {
-    try {
-        buffered_ofstream::write_double(value);
-    } catch (...) {
-        fstream::write_double(value);
-    }
-}
-
-void buffered_fstream::write_int(int32 value) {
-    try {
-        buffered_ofstream::write_int(value);
-    } catch (...) {
-        fstream::write_int(value);
-    }
-}
-
-void buffered_fstream::write_uint(uint32 value) {
-    try {
-        buffered_ofstream::write_uint(value);
-    } catch (...) {
-        fstream::write_uint(value);
-    }
-}
-
-char8 buffered_fstream::read_char() {
-    char8 value;
-
-    try {
-        value = buffered_ifstream::read_char();
-    } catch(...) {
-        value = fstream::read_char();
+    while ((sym = fgetc(handle_)) != EOF && i < size_) {
+        ptr_[i] = sym;
+        i++;
     }
 
-    return value;
+    actual_size_ = i;
+    current_ = 0;
 }
 
-real32 buffered_fstream::read_float() {
-    real32 value;
+int32 buffered_ifstream::read_int() {
+    if (current_ >= actual_size_)
+        read_buffer();
 
-    try {
-        value = buffered_ifstream::read_float();
-    } catch(...) {
-        value = fstream::read_float();
-    }
-
-    return value;
-}
-
-real64 buffered_fstream::read_double() {
-    real64 value;
-
-    try {
-        value = buffered_ifstream::read_double();
-    } catch(...) {
-        value = fstream::read_double();
-    }
-
-    return value;
-}
-
-int32 buffered_fstream::read_int() {
     int32 value;
-
-    try {
-        value = buffered_ifstream::read_int();
-    } catch(...) {
-        value = fstream::read_int();
-    }
+    current_ += sscanf(ptr_ + current_, "%d", &value);
 
     return value;
 }
 
-uint32 buffered_fstream::read_uint() {
-    uint32 value;
+uint32 buffered_ifstream::read_uint() {
+    if (current_ >= actual_size_)
+        read_buffer();
 
-    try {
-        value = buffered_ifstream::read_uint();
-    } catch(...) {
-        value = fstream::read_uint();
-    }
+    uint32 value;
+    current_ += sscanf(ptr_ + current_, "%u", &value);
 
     return value;
+}
+
+real32 buffered_ifstream::read_float() {
+    if (current_ >= actual_size_)
+        read_buffer();
+
+    real32 value;
+    current_ += sscanf(ptr_ + current_, "%f", &value);
+
+    return value;
+}
+
+real64 buffered_ifstream::read_double() {
+    if (current_ >= actual_size_)
+        read_buffer();
+
+    uint32 value;
+    current_ += sscanf(ptr_ + current_, "%lf", &value);
+
+    return value;
+}
+
+char8 buffered_ifstream::read_char() {
+    if (current_ == actual_size_)
+        read_buffer();
+
+    char8 value = ptr_[current_];
+    current_++;
+}
+
+buffered_ofstream::buffered_ofstream(FILE* file, usize size) : buffer(size), handle_(file) {}
+
+void buffered_ofstream::write_buffer() {
+    for (usize i = 0; i < size_; i++)
+        fputc(ptr_[i], handle_);
+    
+    current_ = 0;
+}
+
+void buffered_ofstream::write_int(int32 value) {
+    char8 buf[16];
+    usize len = sprintf(buf, "%d", value);
+
+    if (current_ + len == size_)
+        write_buffer();
+
+    snprintf(ptr_ + current_, len, buf);
+}
+
+void buffered_ofstream::write_uint(uint32 value) {
+    char8 buf[16];
+    usize len = sprintf(buf, "%u", value);
+
+    if (current_ + len == size_)
+        write_buffer();
+
+    snprintf(ptr_ + current_, len, buf);
+}
+
+void buffered_ofstream::write_float(real32 value) {
+    char8 buf[16];
+    usize len = sprintf(buf, "%f", value);
+
+    if (current_ + len == size_) {
+        write_buffer();
+        current_ = 0;
+    }
+
+    snprintf(ptr_ + current_, len, buf);
+}
+
+void buffered_ofstream::write_double(real64 value) {
+    char8 buf[16];
+    usize len = sprintf(buf, "%lf", value);
+
+    if (current_ + len == size_)
+        write_buffer();
+
+    snprintf(ptr_ + current_, len, buf);
+}
+
+void buffered_ofstream::write_char(char8 value) {
+    if (current_ == size_)
+        write_buffer();
+
+    ptr_[current_] = value;
+}
+
+buffered_fstream::buffered_fstream(const char* filename, usize out_buffer_size, usize in_buffer_size) :
+    handle_(fopen(filename, "a+")),
+    buffered_ifstream(handle_, in_buffer_size), buffered_ofstream(handle_, out_buffer_size) {}
+
+buffered_fstream::~buffered_fstream() {
+    fclose(handle_);
+}
+
+bool buffered_fstream::is_open() const {
+    return handle_ != nullptr;
+}
+
+bool buffered_fstream::eof() const {
+    return static_cast<bool>(feof(handle_));
+}
+
+void buffered_fstream::close() {
+    fclose(handle_);
 }

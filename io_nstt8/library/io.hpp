@@ -1,5 +1,7 @@
 #include <cstdio>
 #include <cstdint>
+#include <cassert>
+
 #include <string>
 #include <stdexcept>
 
@@ -26,7 +28,6 @@ class io {
 
 class input_stream : virtual public io {
     public:
-
     virtual int32 read_int() = 0;
     virtual uint32 read_uint() = 0;
 
@@ -34,14 +35,10 @@ class input_stream : virtual public io {
     virtual real64 read_double() = 0;
 
     virtual char8 read_char() = 0;
-
-    protected:
-    usize reading_pos_;
 };
 
 class output_stream : virtual public io {
     public:
-
     virtual void write_int(int32 value) = 0;
     virtual void write_uint(uint32 value) = 0;
 
@@ -77,9 +74,9 @@ class fstream : public io_stream {
 
     virtual char8 read_char();
 
-    virtual bool is_open() const;
-    virtual bool eof() const;
-    virtual void close();
+    bool is_open() const;
+    bool eof() const;
+    void close();
 
     protected:
     FILE* handle_{nullptr};
@@ -108,11 +105,12 @@ class sstream : public io_stream {
 
     virtual char8 read_char();
 
-    virtual bool is_open() const;
-    virtual bool eof() const;
-    virtual void close();
+    bool is_open() const;
+    bool eof() const;
+    void close();
 
     protected:
+    usize reading_pos_;
     std::string* handle_{nullptr};
 };
 
@@ -123,62 +121,18 @@ class buffer {
 
     virtual ~buffer();
 
-    char8* get_buffer();
-
     protected:
-    void push_symbols(char* str, usize n);
-
     char8* ptr_{nullptr};
     usize size_{0};
     usize current_{0};
 };
 
-class buffered_ifstream : public buffer {
+class buffered_ifstream : public buffer, public input_stream {
     public:
     buffered_ifstream() = default;
-    buffered_ifstream(FILE* fd, usize size);
+    buffered_ifstream(FILE* file, usize size);
 
     ~buffered_ifstream() = default;
-
-    virtual int32 read_int();
-    virtual uint32 read_uint();
-
-    virtual real32 read_float();
-    virtual real64 read_double();
-
-    virtual char8 read_char();
-};
-
-class buffered_ofstream : public buffer {
-    public:
-    buffered_ofstream() = default;
-    buffered_ofstream(usize size);
-
-    ~buffered_ofstream() = default;
-
-    virtual void write_int(int32 value);
-    virtual void write_uint(uint32 value);
-
-    virtual void write_float(real32 value);
-    virtual void write_double(real64 value);
-
-    virtual void write_char(char8 value);
-};
-
-class buffered_fstream : public fstream, public buffered_ifstream, public buffered_ofstream {
-    public:
-    buffered_fstream() = default;
-    buffered_fstream(const char* filename, usize buffer_size);
-
-    ~buffered_fstream() = default;
-
-    void write_int(int32 value);
-    void write_uint(uint32 value);
-
-    void write_float(real32 value);
-    void write_double(real64 value);
-
-    void write_char(char8 value);
 
     int32 read_int();
     uint32 read_uint();
@@ -188,6 +142,49 @@ class buffered_fstream : public fstream, public buffered_ifstream, public buffer
 
     char8 read_char();
 
-    char8* get_reading_buffer();
-    char8* get_writing_buffer();
+    private:
+
+    // Read chunk (with size which was given) of data from the file
+    void read_buffer();
+
+    usize actual_size_;
+    FILE* handle_;
+};
+
+class buffered_ofstream : public buffer, public output_stream {
+    public:
+    buffered_ofstream() = default;
+    buffered_ofstream(FILE* file, usize size);
+
+    ~buffered_ofstream() = default;
+
+    void write_int(int32 value);
+    void write_uint(uint32 value);
+
+    void write_float(real32 value);
+    void write_double(real64 value);
+
+    void write_char(char8 value);
+
+    private:
+
+    // Writes buffer to the file
+    void write_buffer();
+
+    FILE* handle_;
+};
+
+class buffered_fstream : public buffered_ifstream, public buffered_ofstream {
+    public:
+    buffered_fstream() = default;
+    buffered_fstream(const char* filename, usize out_buffer_size, usize in_buffer_size);
+
+    ~buffered_fstream();
+
+    bool is_open() const;
+    bool eof() const;
+    void close();
+
+    private:
+    FILE* handle_;
 };

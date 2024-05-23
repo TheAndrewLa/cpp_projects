@@ -15,12 +15,19 @@ std::conditional_t<N == I, std::integral_constant<usize, D>, prime<N, D + 1, I +
 prime<N, D + 1, I>> {};
 
 int main(int, char**) {
+<<<<<<< HEAD
     std::cout << prime<90>{} << '\n';
     std::cout << prime<91>{} << '\n';
     std::cout << prime<92>{} << '\n';
     std::cout << prime<93>{} << '\n';
 
     std::cout << "All tests passed!" << '\n';
+=======
+    std::cout << prime<15>{} << '\n';
+    std::cout << prime<30>{} << '\n';
+    std::cout << prime<60>{} << '\n';
+    std::cout << prime<120>{} << '\n';
+>>>>>>> e78672b (hmmmm)
 
     return 0;
 }

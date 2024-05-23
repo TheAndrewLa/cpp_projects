@@ -2,79 +2,84 @@
 #include <stdexcept>
 
 #include <cstddef>
+#include <cstdint>
 #include <cstring>
 
 #include <iostream>
 #include <string>
 #include <tuple>
 
+#include "mock.hpp"
+
 using uint8 = uint8_t;
 
 using usize = std::size_t;
 using isize = std::ptrdiff_t;
 
+using std::string;
+
 template <usize Size, std::copyable... Args>
-void allocate(void* memory, const Args&... args) {   
+void allocate(void* memory, const Args&... args) requires((... + sizeof(Args)) <= Size) {   
     if (memory == nullptr)
         throw std::invalid_argument{"Invalid pointer!\n"};
 
-    if constexpr ((... + sizeof(Args)) > Size) {
-        throw std::invalid_argument{"Not enough memory!\n"};
-    }
-    else {
-        uint8* ptr = reinterpret_cast<uint8*>(memory);
-        ((new (ptr) Args{args}, ptr += sizeof(args)), ...);
-    }
+    uint8* ptr = reinterpret_cast<uint8*>(memory);
+    ((new (ptr) Args{args}, ptr += sizeof(args)), ...);
 }
 
-template <typename... Types>
+template <std::destructible... Types>
 class Tuple {
     public:
     Tuple() = delete;
 
-    template <typename... Args> // Use perfect forwarding here
-    Tuple(Args&&... args) {
-        static_assert(sizeof...(Args) == sizeof...(Types));
-        static_assert((... && std::same_as<std::remove_reference_t<Args>, Types>));
-
-        memory_ = new uint8[(... + sizeof(Types))];
+    template <typename... Args>
+    Tuple(Args&&... args) requires((sizeof...(Args) == sizeof...(Types))) {
+        memory_ = &arr_[0];
         uint8* ptr = memory_;
 
         ((new (ptr) Types{std::forward<Args>(args)}, ptr += sizeof(Types)), ...);
     }
 
-    Tuple(const Tuple& tuple) requires(... && std::copyable<Types>) {
-        usize size = (... + sizeof(Types));
+    Tuple(const Tuple& tuple) requires((... && std::is_copy_constructible_v<Types>)) {
+        usize i = 0;
 
-        memory_ = new uint8[size];
-        std::memcpy(memory_, tuple.memory_, size);
+        memory_ = &arr_[0];
+        uint8* ptr = memory_;
 
-        /// @todo copy elements with copy ctor
+        ((new (ptr) Types{tuple.Get<Types>(i)}, ptr += sizeof(Types), i++), ...);
     }
 
     Tuple(Tuple&& tuple) {
+        // Just grabbing memory withou calling move ctor
         memory_ = tuple.memory_;
         tuple.memory_ = nullptr;
     }
 
     ~Tuple() {
-        delete [] memory_;
+        uint8* ptr = memory_;
+        ((((*reinterpret_cast<Types*>(ptr)).~Types()), ptr += sizeof(Types)), ...);
     }
 
-    Tuple& operator=(const Tuple& tuple) {
-        delete [] memory_;
+    Tuple& operator=(const Tuple& tuple) requires((... && std::is_copy_constructible_v<Types>)) {
+        usize i = 0;
+        (((delete (reinterpret_cast<Types*>(i))), i++), ...);
 
         usize size = (... + sizeof(Types));
+        i = 0;
 
         memory_ = new uint8[size];
-        std::memcpy(memory_, tuple.memory_, size);
+        uint8* ptr = memory_;
+
+        ((new (ptr) Types{tuple.Get<Types>(i)}, ptr += sizeof(Types), i++), ...);
 
         return *this;
     }
 
     Tuple& operator=(Tuple&& tuple) {
-        delete [] memory_;
+        uint8* ptr = memory_;
+        ((((*reinterpret_cast<Types*>(ptr)).~Types()), ptr += sizeof(Types)), ...);
 
+        // Just grabbing memory without calling move ctor
         memory_ = tuple.memory_;
         tuple.memory_ = nullptr;
 
@@ -93,7 +98,7 @@ class Tuple {
 
     private:
 
-    uint8* get_arg(usize index) {
+    uint8* get_arg(usize index) const {
         uint8* found;
         uint8* ptr = memory_;
 
@@ -103,10 +108,13 @@ class Tuple {
         return found;
     }
 
+    uint8 arr_[(... + sizeof(Types))];
     uint8* memory_{nullptr};
 };
 
 int main(int, char**) {
+
+#if 1
     int* args = new int[5];
     allocate<20>(args, 12, 14, 16, 18, 20);
     
@@ -114,10 +122,47 @@ int main(int, char**) {
         std::cout << args[i] << "\n";
 
     delete [] args;
+#endif
 
-    Tuple<int, int, std::string, int> tuple{12, 13, std::string{"Hello World!"}, 14};
+#if 1
+    MockObject a{12};
+    MockObject b{13};
+    MockObject c{14};
 
-    std::cout << tuple.Get<int>(0) << ' ' << tuple.Get<int>(1) << ' ' << tuple.Get<std::string>(2) << '\n';
+    std::cout << "\nCREATING OF TUPLE BELOW!\n";
+
+    Tuple<MockObject, MockObject, MockObject, MockObject, MockObject>
+    tuple{MockObject{11}, a, std::move(b), c, MockObject{15}};
+
+    std::cout << tuple.Get<MockObject>(0).x() << ' ';
+    std::cout << tuple.Get<MockObject>(1).x() << ' ';
+    std::cout << tuple.Get<MockObject>(2).x() << ' ';
+    std::cout << tuple.Get<MockObject>(3).x() << ' ';
+    std::cout << tuple.Get<MockObject>(4).x() << ' ';
+
+    //std::cout << "\nCOPYING OF TUPLE BELOW!\n";
+//
+    //Tuple<MockObject, MockObject, MockObject, MockObject, MockObject>
+    //tuple2{tuple};
+//
+    //std::cout << tuple2.Get<MockObject>(0).x() << ' ';
+    //std::cout << tuple2.Get<MockObject>(1).x() << ' ';
+    //std::cout << tuple2.Get<MockObject>(2).x() << ' ';
+    //std::cout << tuple2.Get<MockObject>(3).x() << ' ';
+    //std::cout << tuple2.Get<MockObject>(4).x() << ' ';
+
+#endif
+
+#if 0
+    string world{"world"};
+    Tuple<int, int, string, string> tuple{12, 13, "Hello", world};
+
+    std::cout << tuple.Get<int>(0) << ' ';
+    std::cout << tuple.Get<int>(1) << ' ';
+    std::cout << tuple.Get<string>(2) << ' ';
+    std::cout << tuple.Get<string>(3) << ' ';
+
+#endif
 
     return 0;
 }
